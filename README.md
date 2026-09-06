@@ -112,24 +112,10 @@ bare command always finishes on its own. Pass one and the other is unlimited.
   also quiets per-batch chatter; the config block, results, and version line
   always print either way. `-v`/`--verbose` adds extra detail.
 
-Every report starts by echoing the effective configuration (including what
-the `auto` settings resolved to and where from) and ends with a
-`benchmark by onnx_benchy version X.Y.Z` line.
-
-## What the numbers mean
-
-- **Mean latency** — average time per batch, plus/minus the standard
-  deviation across batches.
-- **Mean ingest** — average tokens per second, again mean ± std over batches,
-  counting only non-padding tokens. Tokenization isn't
-  timed.
-- The JSON output also includes the overall `total_tokens / elapsed` rate and
-  p50/p95 latency as a cross-check.
-
 ## Benchmark text
 
-`data/fineweb-10mb.txt` is ~10 MB of real web text (one document per line)
-taken from `HuggingFaceFW/fineweb`, config `sample-10BT` (license: ODC-By).
+`data/fineweb-10mb.txt` is ~10 MB of data taken from `HuggingFaceFW/fineweb`,
+config `sample-10BT` (license: ODC-By).
 To regenerate it you need network access:
 
 ```bash
