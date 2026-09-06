@@ -1,0 +1,10 @@
+*.onnx
+*.onnx_data
+bench.sh
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+.hf_cache/

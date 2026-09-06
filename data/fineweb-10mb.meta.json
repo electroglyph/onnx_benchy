@@ -1,0 +1,12 @@
+{
+ "source": "HuggingFaceFW/fineweb",
+ "config": "sample-10BT",
+ "split": "train",
+ "column": "text",
+ "bytes": 10483687,
+ "lines": 3426,
+ "skipped_short": 1,
+ "sha256": "83d0b39fa3deef5e218c463b342bed35df1701ed8bda6536c7d185ed7049e2cc",
+ "created_utc": "2026-09-06T11:25:39.710643+00:00",
+ "filter": "len>=200 chars, newlines collapsed, one doc per line, no shuffle"
+}
