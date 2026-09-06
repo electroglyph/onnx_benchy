@@ -1,7 +1,8 @@
 """Metrics computation + report rendering (table/json/csv).
 
 Primary stats are means over per-batch samples (NOT total/elapsed); the
-overall total/elapsed rate is included as a diagnostic.
+overall total/elapsed rate is included as a diagnostic. Latency is reported
+per document (each batch's time divided by batch size).
 """
 
 from __future__ import annotations
@@ -18,14 +19,21 @@ def summarize(stats: dict) -> dict:
     times = stats["times"]
     toks = stats["toks"]
     n = len(times)
-    lat_mean_s = sum(times) / n
-    lat_std_s = statistics.stdev(times) if n >= 2 else 0.0
+    batch_size = stats.get("batch_size", 1) or 1
+    # Per-document latency: each batch holds `batch_size` documents
+    # (packed chunks in pack mode, one doc per sequence with --no-pack),
+    # so divide each batch time evenly across its documents.
+    doc_times = [t / batch_size for t in times]
+    lat_mean_s = sum(doc_times) / n
+    lat_std_s = statistics.stdev(doc_times) if n >= 2 else 0.0
     per_batch_tps = [t / dt if dt > 0 else 0.0 for t, dt in zip(toks, times)]
     tps_mean = sum(per_batch_tps) / n
     tps_std = statistics.stdev(per_batch_tps) if n >= 2 else 0.0
     overall = stats["tokens"] / stats["elapsed_s"] if stats["elapsed_s"] > 0 else 0.0
     out = {
         "batches": stats["batches"],
+        "batch_size": batch_size,
+        "documents": stats.get("documents", stats["batches"] * batch_size),
         "tokens": stats["tokens"],
         "elapsed_s": stats["elapsed_s"],
         "latency_ms": {"mean": lat_mean_s * 1000, "std": lat_std_s * 1000},
@@ -37,8 +45,8 @@ def summarize(stats: dict) -> dict:
     if n >= 2:
         import numpy as np
 
-        out["latency_ms"]["p50"] = float(np.percentile(np.array(times) * 1000, 50))
-        out["latency_ms"]["p95"] = float(np.percentile(np.array(times) * 1000, 95))
+        out["latency_ms"]["p50"] = float(np.percentile(np.array(doc_times) * 1000, 50))
+        out["latency_ms"]["p95"] = float(np.percentile(np.array(doc_times) * 1000, 95))
     return out
 
 
@@ -80,7 +88,7 @@ def render_table(config_lines: list[tuple[str, str]], rows: list[dict]) -> str:
     table.add_column("Batches", justify="right")
     table.add_column("Tokens", justify="right")
     table.add_column("Elapsed", justify="right")
-    table.add_column("Mean latency (per batch)")
+    table.add_column("Mean latency (per doc)")
     table.add_column("Mean ingest")
     for r in rows:
         m = r["summary"]
@@ -121,13 +129,16 @@ def render_csv(config_lines: list[tuple[str, str]], rows: list[dict]) -> str:
         buf.write(f"# {key}: {val}\n")
     w = csv.writer(buf)
     w.writerow(
-        ["backend", "batches", "tokens", "elapsed_s", "latency_ms_mean",
+        ["backend", "batches", "documents", "tokens", "elapsed_s", "latency_ms_mean",
          "latency_ms_std", "throughput_tps_mean", "throughput_tps_std"]
     )
     for r in rows:
         m = r["summary"]
+        # .get for back-compat with summaries built before documents/batch_size existed
+        batch_size = m.get("batch_size", 1) or 1
+        documents = m.get("documents", m["batches"] * batch_size)
         w.writerow(
-            [r["provider"], m["batches"], m["tokens"], f"{m['elapsed_s']:.3f}",
+            [r["provider"], m["batches"], documents, m["tokens"], f"{m['elapsed_s']:.3f}",
              f"{m['latency_ms']['mean']:.3f}", f"{m['latency_ms']['std']:.3f}",
              f"{m['throughput_tps']['mean']:.1f}", f"{m['throughput_tps']['std']:.1f}"]
         )

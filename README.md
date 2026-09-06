@@ -50,7 +50,9 @@ One flag per backend: `--cpu`, `--cuda`, `--tensorrt`, `--rocm`,
 
 ### Batch shape
 
-- `--batch-size` (default `16`) — sequences per inference request.
+- `--batch-size` (default `16`) — sequences per inference request. Latency
+  is reported per document (batch time divided by batch size), so it's
+  comparable across batch sizes.
 - `--context-size` (default `512`, also spelled `--seq-len` or
   `--max-length`) — tokens per sequence. Long documents are split, short ones
   padded. If it's larger than the tokenizer's own limit, it's clamped down
@@ -91,6 +93,20 @@ Whichever limit hits first stops the run, and it's checked after every batch.
 - `--no-progress` — hide the progress bars. `-q`/`--quiet` does the same but
   also quiets per-batch chatter; the config block, results, and version line
   always print either way. `-v`/`--verbose` adds extra detail.
+
+## Results
+
+- `Mean latency (per doc)` — average time per document/sequence: each timed
+  batch's wall time divided by `--batch-size`, then averaged over batches
+  (std, and `p50`/`p95` in `json`, come from the same per-doc samples).
+- `Mean ingest` — tokens/sec, averaged over batches from non-pad tokens
+  (attention-mask sum) only.
+- `Batches` / `Tokens` / `Elapsed` — totals for the timed loop (warmup and
+  tokenization excluded).
+
+With default packing, a "document" is one dense `context-size` chunk sliced
+from the concatenated corpus; with `--no-pack` it's one source line per
+sequence (truncate-and-pad).
 
 ## Benchmark text
 

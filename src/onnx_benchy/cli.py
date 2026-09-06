@@ -266,6 +266,7 @@ def main(argv: list[str] | None = None) -> int:
             rows.append({"provider": provider, "label": label, "summary": summary})
             if args.verbose:
                 print(f"detail: {label}: {summary['batches']} batches, "
+                      f"{summary['documents']} docs, "
                       f"{summary['throughput_overall_tps']:.0f} tok/s overall, "
                       f"{stats['epochs']} corpus epoch(s), "
                       f"feed=[{','.join(feed_names)}]")

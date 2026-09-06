@@ -1,6 +1,6 @@
 [project]
 name = "onnx_benchy"
-version = "0.1.0"
+version = "0.2.0"
 description = "Benchmark ONNX embedding models across ONNX Runtime backends"
 readme = "README.md"
 requires-python = ">=3.10"

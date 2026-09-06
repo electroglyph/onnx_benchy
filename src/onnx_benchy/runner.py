@@ -88,6 +88,8 @@ def run_backend(
     elapsed = perf_counter() - t0
     return {
         "batches": len(times),
+        "batch_size": stream.batch_size,
+        "documents": len(times) * stream.batch_size,
         "tokens": tokens_done,
         "elapsed_s": elapsed,
         "times": times,
