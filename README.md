@@ -60,10 +60,7 @@ One flag per backend: `--cpu`, `--cuda`, `--tensorrt`, `--rocm`,
   then the first output. You can also pass an index (`--output 1`) or an
   exact name.
 - `--pooling` (default `auto`) — `cls`, `mean`, `max`, `lasttoken` (`last`
-  works too), or `none`. With `auto`, an already-pooled (rank 2) output means
-  `none`; otherwise the tool reads the Sentence-Transformers pooling config,
-  falling back to `mean` with a warning if there isn't one. An explicit flag
-  always wins.
+  works too), or `none`.
 - `--normalize` (default `auto`) — `true` or `false`, whether to L2-normalize
   the embeddings. `auto` turns it on when the config has a Normalize module,
   off otherwise.
@@ -71,10 +68,8 @@ One flag per backend: `--cpu`, `--cuda`, `--tensorrt`, `--rocm`,
 
 ### How long to run
 
-- `--tokens` — stop after this many input tokens. Only non-padding tokens
-  count.
-- `--minutes` — stop after this many minutes of timed benchmarking per
-  backend. Warmup and tokenization aren't included.
+- `--tokens` — stop after this many input tokens.
+- `--minutes` — stop after this many minutes, warmup and tokenization aren't included.
 
 Whichever limit hits first stops the run, and it's checked after every batch.
 
