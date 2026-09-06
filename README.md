@@ -116,7 +116,7 @@ bare command always finishes on its own. Pass one and the other is unlimited.
 
 `data/fineweb-10mb.txt` is ~10 MB of data taken from `HuggingFaceFW/fineweb`,
 config `sample-10BT` (license: ODC-By).
-To regenerate it you need network access:
+To regenerate it:
 
 ```bash
 python scripts/fetch_fineweb.py
