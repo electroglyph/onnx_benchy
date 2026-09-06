@@ -1,9 +1,6 @@
 # onnx_benchy
 
-onnx_benchy measures how fast an ONNX text-embedding model runs. You give it
-a `.onnx` file and a tokenizer, it feeds the model real text in batches and
-reports per-batch latency and tokens-per-second for each ONNX Runtime backend
-on your machine (CPU, CUDA, TensorRT, and the rest).
+onnx_benchy measures how fast an ONNX text-embedding model runs
 
 ```bash
 onnx_benchy model.onnx --tokenizer BAAI/bge-small-en-v1.5
@@ -29,18 +26,11 @@ pip install -e .          # CPU build
 pip install -e ".[cuda]"  # GPU build, in a separate venv
 ```
 
-The CPU and GPU variants both import as `onnxruntime`, so they can't live in
-the same environment. If you want to benchmark both, use two venvs. The tool
-itself doesn't care which one is installed; it just uses whatever providers
-`onnxruntime.get_available_providers()` reports.
-
 ## Options
 
 ### Model and tokenizer
 
-- `model` — path to the `.onnx` file. Loaded in place; the file is never
-  copied or moved. If the export uses external data, `model.onnx_data` has to
-  sit next to it or loading fails.
+- `model` — path to the `.onnx` file.
 - `--tokenizer` (required) — local directory or Hugging Face id, e.g.
   `./tok/` or `BAAI/bge-small-en-v1.5`. An ONNX file doesn't include a
   tokenizer, so there is no default here.
@@ -56,18 +46,12 @@ One flag per backend: `--cpu`, `--cuda`, `--tensorrt`, `--rocm`,
 `--migraphx`, `--openvino`, `--coreml`, `--directml`, `--qnn`.
 
 - If you pass none of them, every supported backend available on the machine
-  is benchmarked. Anything else the ONNX Runtime build reports (Azure and
-  other edge/preview providers) is skipped.
+  is benchmarked.
 - If you pass one or more, only those run. A requested backend that isn't
   available is skipped with a warning; if none remain, the run exits with an
   error.
 - `--all` spells out the default "run everything" behavior. `--list-backends`
   prints available providers and exits.
-
-Each backend gets its own session with a single provider, so the timings
-belong to that backend alone. At startup the tool logs what the session
-actually runs on, since a provider being installed doesn't always mean the
-model executed on it.
 
 ### Batch shape
 
@@ -135,12 +119,10 @@ the `auto` settings resolved to and where from) and ends with a
 ## What the numbers mean
 
 - **Mean latency** — average time per batch, plus/minus the standard
-  deviation across batches. Shown in milliseconds, or seconds when the average
-  passes 1000 ms.
+  deviation across batches.
 - **Mean ingest** — average tokens per second, again mean ± std over batches,
-  counting only non-padding tokens. Tokenization happens up front and isn't
-  timed, so this is the rate at which the model itself (plus pooling and
-  normalization) consumes tokens.
+  counting only non-padding tokens. Tokenization isn't
+  timed.
 - The JSON output also includes the overall `total_tokens / elapsed` rate and
   p50/p95 latency as a cross-check.
 
