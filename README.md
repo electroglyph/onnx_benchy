@@ -47,11 +47,6 @@ One flag per backend: `--cpu`, `--cuda`, `--tensorrt`, `--rocm`,
 
 - If you pass none of them, every supported backend available on the machine
   is benchmarked.
-- If you pass one or more, only those run. A requested backend that isn't
-  available is skipped with a warning; if none remain, the run exits with an
-  error.
-- `--all` spells out the default "run everything" behavior. `--list-backends`
-  prints available providers and exits.
 
 ### Batch shape
 
@@ -72,8 +67,7 @@ One flag per backend: `--cpu`, `--cuda`, `--tensorrt`, `--rocm`,
 - `--normalize` (default `auto`) — `true` or `false`, whether to L2-normalize
   the embeddings. `auto` turns it on when the config has a Normalize module,
   off otherwise.
-- `--warmup-batches` (default `2`) — untimed batches run before measuring,
-  to get past GPU init and memory allocation. Not counted in the results.
+- `--warmup-batches` (default `2`) — untimed batches run before measuring.
 
 ### How long to run
 
@@ -83,27 +77,18 @@ One flag per backend: `--cpu`, `--cuda`, `--tensorrt`, `--rocm`,
   backend. Warmup and tokenization aren't included.
 
 Whichever limit hits first stops the run, and it's checked after every batch.
-If you pass neither, both default on (`100000` tokens, `2.0` minutes), so a
-bare command always finishes on its own. Pass one and the other is unlimited.
 
 ### Data and misc
 
-- `--data` (default `data/fineweb-10mb.txt`) — text file to benchmark on, one
-  document per line. A ~10 MB FineWeb sample ships with the repo; point this
-  anywhere else for custom text. If the run needs more tokens than the file
-  holds, it wraps around and keeps going.
-- `--seed` (default `23`) — fixes the corpus order: the shuffle is
-  deterministic, so every run with the same seed processes documents in the
-  exact same order. Change the seed to get a different (but equally
-  reproducible) order.
+- `--data` (default `data/fineweb-10mb.txt`) — text file to benchmark on.
+- `--seed` (default `23`) — bleh.
 - `--no-shuffle` — keep the file's line order instead.
 - `--no-pack` — by default, all text is concatenated and sliced into full
   `context-size` blocks, so every batch is dense and the tok/s numbers are
   honest. `--no-pack` goes back to one document per sequence with
   truncate-and-pad, which keeps document boundaries intact at the cost of some
   padding.
-- `--offline` — never touch the network. The tokenizer must be local or
-  already cached, otherwise the run fails fast instead of downloading.
+- `--offline` — self-explanatory.
 - `--trust-remote-code` — pass `trust_remote_code=True` when loading the
   tokenizer. Off by default; only enable it for tokenizers you trust.
 - `--output-format` (default `table`) — `table`, `json`, or `csv`.
