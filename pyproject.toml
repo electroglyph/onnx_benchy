@@ -5,6 +5,8 @@ description = "Benchmark ONNX embedding models across ONNX Runtime backends"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
+authors = [{ name = "electroglyph" }]
+urls = { Homepage = "https://github.com/electroglyph/onnx_benchy" }
 dependencies = [
   "onnxruntime>=1.17",
   "transformers>=4.40",

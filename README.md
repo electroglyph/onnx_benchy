@@ -16,6 +16,15 @@ onnx_benchy model.onnx --tokenizer ./my-tokenizer/ --cuda --cpu \
 ## Install
 
 ```bash
+pip install onnx-benchy            # CPU build
+pip install "onnx-benchy[cuda]"    # GPU build, in a separate venv
+```
+
+From source, for development:
+
+```bash
+git clone https://github.com/electroglyph/onnx_benchy
+cd onnx_benchy
 pip install -e .          # CPU build
 pip install -e ".[cuda]"  # GPU build, in a separate venv
 ```
