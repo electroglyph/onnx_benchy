@@ -2,7 +2,9 @@
 
 Tokenization happens ONCE before timing starts, so reported latency /
 throughput = model inference + pooling/norm only ("ingest speed").
-Latency is reported per document (batch time / batch size).
+Latency is reported per document (batch time / batch size). Corpus
+wrap-around (reshuffle + retokenize) runs untimed in the benchmark loop,
+so epoch boundaries never spike a sample.
 
 Packing (default): concatenate all token ids, slice into dense
 context-size blocks. Every batch is [B, C] non-pad tokens; tok/s is honest.

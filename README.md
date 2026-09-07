@@ -97,12 +97,14 @@ Whichever limit hits first stops the run, and it's checked after every batch.
 ## Results
 
 - `Mean latency (per doc)` — average time per document/sequence: each timed
-  batch's wall time divided by `--batch-size`, then averaged over batches
-  (std, and `p50`/`p95` in `json`, come from the same per-doc samples).
+  batch's inference time divided by `--batch-size`, then averaged over
+  batches. The `±` is the standard error of the mean (`std / sqrt(n)`); `std`,
+  95% CI, and `p50`/`p95` are in `json` (`sem`/`std` columns in `csv`).
 - `Mean ingest` — tokens/sec, averaged over batches from non-pad tokens
-  (attention-mask sum) only.
-- `Batches` / `Tokens` / `Elapsed` — totals for the timed loop (warmup and
-  tokenization excluded).
+  (attention-mask sum) only, `±` SEM as above.
+- `Batches` / `Tokens` / `Elapsed` — totals for the timed loop (warmup
+  excluded; batch assembly and epoch wrap-around reprep run untimed, so only
+  inference + pooling/norm is timed).
 
 With default packing, a "document" is one dense `context-size` chunk sliced
 from the concatenated corpus; with `--no-pack` it's one source line per

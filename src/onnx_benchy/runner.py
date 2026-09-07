@@ -36,7 +36,9 @@ def run_backend(
     """Run warmup + timed loop for one backend. Returns stats dict."""
     output_name = sess.get_outputs()[output_index].name
 
-    def one_batch():
+    def fetch_batch():
+        # Untimed: batch assembly + epoch rollover (reshuffle + retokenize of
+        # the whole corpus on wrap) live here so a wrap never spikes a sample.
         input_ids, mask, nonpad = stream.next_batch()
         feed = {}
         if "input_ids" in feed_names:
@@ -45,8 +47,16 @@ def run_backend(
             feed["attention_mask"] = mask
         if "token_type_ids" in feed_names:
             feed["token_type_ids"] = np.zeros_like(input_ids)
+        return feed, mask, nonpad
+
+    def infer(feed, mask):
+        # Timed: model inference + pooling/norm only ("ingest speed").
         outs = sess.run([output_name], feed)
         _emb = pool_and_norm(outs[0], mask, pooling, normalize)
+
+    def one_batch():
+        feed, mask, nonpad = fetch_batch()
+        infer(feed, mask)
         return nonpad
 
     if warmup_batches > 0:
@@ -73,8 +83,9 @@ def run_backend(
         unit="tok",
     ) as pbar:
         while True:
+            feed, mask, nonpad = fetch_batch()
             s = perf_counter()
-            nonpad = one_batch()
+            infer(feed, mask)
             dt = perf_counter() - s
             times.append(dt)
             toks.append(nonpad)
